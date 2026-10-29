@@ -27,9 +27,34 @@
 
 ## Project setup
 
+Use Node.js 20.19 or newer.
+
 ```bash
 $ npm install
 ```
+
+## PostgreSQL
+
+The API reads its PostgreSQL connection string from `DATABASE_URL`. For local
+development, copy the example environment file and create the database if you
+have not already:
+
+```bash
+cp .env.example .env
+createdb event_processing_platform
+```
+
+The example URL uses the local PostgreSQL role for your operating-system user.
+Update it if your database uses a different username, password, host, or port.
+
+Start the API from this directory:
+
+```bash
+npm run start:dev
+```
+
+TypeORM schema synchronization is disabled; database tables should be managed
+with migrations as entities are added.
 
 ## Compile and run the project
 
