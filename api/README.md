@@ -115,6 +115,20 @@ List endpoints:
 curl http://localhost:3000/endpoints
 ```
 
+Send a webhook to the one-time ingress path returned when creating the endpoint:
+
+```bash
+curl -X POST http://localhost:3000/webhooks/<token> \
+  -H 'Content-Type: application/json' \
+  -H 'X-Event-Type: order.created' \
+  -H 'Idempotency-Key: provider-event-123' \
+  -d '{"orderId":"order-123"}'
+```
+
+The ingress route accepts JSON objects up to 1 MiB and responds with
+`202 Accepted` and an `eventId` after storing the event. Repeated requests with
+the same `Idempotency-Key` for one endpoint return the existing event ID.
+
 ## Compile and run the project
 
 ```bash

@@ -8,5 +8,6 @@ import { EndpointsService } from './endpoints.service.js';
   imports: [TypeOrmModule.forFeature([Endpoint])],
   controllers: [EndpointsController],
   providers: [EndpointsService],
+  exports: [EndpointsService],
 })
 export class EndpointsModule {}
