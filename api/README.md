@@ -35,17 +35,35 @@ $ npm install
 
 ## PostgreSQL
 
-The API reads its PostgreSQL connection string from `DATABASE_URL`. For local
-development, copy the example environment file and create the database if you
-have not already:
+The API requires a local PostgreSQL server. With Homebrew on macOS, start the
+service if it is not already running:
 
 ```bash
-cp .env.example .env
+brew services start postgresql@18
+pg_isready
+```
+
+Create the development database once (skip this if it already exists):
+
+```bash
 createdb event_processing_platform
 ```
 
-The example URL uses the local PostgreSQL role for your operating-system user.
-Update it if your database uses a different username, password, host, or port.
+From the `api` directory, copy the example environment file:
+
+```bash
+cp .env.example .env
+```
+
+Configure these environment variables in `.env`:
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `DATABASE_URL` | Yes | — | PostgreSQL connection URL. The example uses `postgresql://localhost:5432/event_processing_platform`, which connects using your local PostgreSQL role. Update the URL if your role, password, host, or port differs. |
+| `PORT` | No | `3000` | Port used by the API HTTP server. |
+
+`ConfigModule` loads `.env` for local development. `.env` is ignored by Git;
+keep credentials out of `.env.example` and source control.
 
 Start the API from this directory:
 
@@ -53,8 +71,26 @@ Start the API from this directory:
 npm run start:dev
 ```
 
-TypeORM schema synchronization is disabled; database tables should be managed
-with migrations as entities are added.
+TypeORM schema synchronization is disabled. Manage database tables with
+migrations as entities are added.
+
+## Database migrations
+
+The initial migration creates the `endpoints`, `events`, and
+`delivery_attempts` tables. From the `api` directory, use:
+
+```bash
+# See pending migrations
+npm run migration:show
+
+# Apply pending migrations
+npm run migration:run
+
+# Revert the most recently applied migration
+npm run migration:revert
+```
+
+These commands build the API first and load `DATABASE_URL` from `.env`.
 
 ## Compile and run the project
 
