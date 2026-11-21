@@ -65,6 +65,27 @@ describe('EndpointsService', () => {
     });
   });
 
+  it('looks up active endpoints using the inbound token hash', async () => {
+    const token = 'A'.repeat(43);
+    const endpoint = {
+      id: 'a0d43147-1940-4b79-8437-8796ea1cc8b0',
+      name: 'Orders',
+      destinationUrl: 'https://customer.example/webhooks',
+      inboundTokenHash: createHash('sha256').update(token).digest('hex'),
+      active: true,
+      createdAt: new Date('2026-01-01T00:00:00.000Z'),
+    };
+    endpointsRepository.findOneBy.mockResolvedValue(endpoint);
+
+    await expect(
+      endpointsService.findActiveByInboundToken(token),
+    ).resolves.toEqual(endpoint);
+    expect(endpointsRepository.findOneBy).toHaveBeenCalledWith({
+      inboundTokenHash: endpoint.inboundTokenHash,
+      active: true,
+    });
+  });
+
   it('rejects invalid and non-local insecure destination URLs', async () => {
     await expect(
       endpointsService.create({
@@ -103,5 +124,6 @@ function createRepositoryMock() {
       createdAt: new Date('2026-01-01T00:00:00.000Z'),
     })),
     find: vi.fn(async (): Promise<Endpoint[]> => []),
+    findOneBy: vi.fn(async (): Promise<Endpoint | null> => null),
   };
 }

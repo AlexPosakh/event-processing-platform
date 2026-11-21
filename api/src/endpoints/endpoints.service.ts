@@ -1,8 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { randomBytes, randomUUID, createHash } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Endpoint } from './endpoint.entity.js';
+import { hashInboundToken, isWellFormedInboundToken } from './inbound-token.js';
 
 export interface EndpointSummary {
   id: string;
@@ -26,15 +27,12 @@ export class EndpointsService {
   async create(input: unknown): Promise<CreatedEndpoint> {
     const { name, destinationUrl } = this.validateInput(input);
     const inboundToken = randomBytes(32).toString('base64url');
-    const inboundTokenHash = createHash('sha256')
-      .update(inboundToken)
-      .digest('hex');
 
     const endpoint = this.endpointsRepository.create({
       id: randomUUID(),
       name,
       destinationUrl,
-      inboundTokenHash,
+      inboundTokenHash: hashInboundToken(inboundToken),
       active: true,
     });
     const savedEndpoint = await this.endpointsRepository.save(endpoint);
@@ -50,6 +48,17 @@ export class EndpointsService {
       order: { createdAt: 'DESC' },
     });
     return endpoints.map((endpoint) => this.toSummary(endpoint));
+  }
+
+  async findActiveByInboundToken(token: string): Promise<Endpoint | null> {
+    if (!isWellFormedInboundToken(token)) {
+      return null;
+    }
+
+    return this.endpointsRepository.findOneBy({
+      inboundTokenHash: hashInboundToken(token),
+      active: true,
+    });
   }
 
   private validateInput(input: unknown): {

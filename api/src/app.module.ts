@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { EndpointsModule } from './endpoints/endpoints.module.js';
+import { WebhooksModule } from './webhooks/webhooks.module.js';
 import { UsersModule } from './users/users.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
@@ -13,6 +14,7 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
   imports: [
     UsersModule,
     EndpointsModule,
+    WebhooksModule,
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
