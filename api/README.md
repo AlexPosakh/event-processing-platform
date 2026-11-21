@@ -92,6 +92,29 @@ npm run migration:revert
 
 These commands build the API first and load `DATABASE_URL` from `.env`.
 
+## Endpoint API
+
+The endpoint management API is currently unauthenticated and intended for local
+development only.
+
+Create an endpoint:
+
+```bash
+curl -X POST http://localhost:3000/endpoints \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Orders","destinationUrl":"https://customer.example/webhooks"}'
+```
+
+The response includes an `inboundPath` containing the generated secret token.
+Save it when creating the endpoint; it is not returned by the listing API.
+Append the path to the API's base URL to configure the provider's webhook URL.
+
+List endpoints:
+
+```bash
+curl http://localhost:3000/endpoints
+```
+
 ## Compile and run the project
 
 ```bash
